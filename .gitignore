@@ -1,0 +1,13 @@
+# Środowiska wirtualne
+venv/
+env/
+
+# Dane i modele
+data/
+*.pt
+*.pth
+*.h5
+
+# Śmieci Pythona
+__pycache__/
+*.pyc
