@@ -1,0 +1,25 @@
+# ==========================================
+# GŁÓWNY FRAMEWORK DEEP LEARNINGOWY
+# ==========================================
+torch          # Główna biblioteka PyTorch (tensory, autograd)
+torchvision    # Zestaw narzędzi do wizji komputerowej (augmentacje, modele)
+
+# ==========================================
+# PRZETWARZANIE DANYCH I OBRAZÓW
+# ==========================================
+numpy          # Szybkie operacje matematyczne na macierzach
+Pillow         # Podstawowa biblioteka (PIL) do wczytywania/zapisu obrazków
+opencv-python  # Bardziej zaawansowane operacje na obrazach (cv2)
+scikit-learn   # Przydatne np. do podziału zbioru na train/test i metryk
+
+# ==========================================
+# WIZUALIZACJA WYNIKÓW
+# ==========================================
+matplotlib     # Rysowanie wykresów funkcji strat (loss) i podgląd wygenerowanych map
+tensorboard    # Świetne narzędzie do śledzenia jak sieć się uczy w czasie rzeczywistym
+
+# ==========================================
+# NARZĘDZIA POMOCNICZE
+# ==========================================
+tqdm           # Paski postępu w konsoli (żeby wiedzieć, ile potrwa epoka)
+jupyter        # Do notatników Jupyter (świetne do testowania i analizy danych na brudno)
