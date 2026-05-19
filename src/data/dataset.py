@@ -26,7 +26,7 @@ class MapDataset(Dataset):
         img_file = self.list_files[index]
 
         # getting full path
-        img_path = os.join(self.root_dir, img_file)
+        img_path = os.path.join(self.root_dir, img_file)
 
         # opening the image using PIL (RGB ensures us of having three colour channels)
         image = Image.open(img_path).convert('RGB')
