@@ -28,9 +28,9 @@ def test():
     axes[1].set_title("Satellite image")
     axes[1].axis("off")
 
-    # show
-    plt.tight_layout()
-    plt.show()
+    # saving test result as an image in the main folder of the project
+    plt.savefig("test_result.png", bbox_inches="tight")
+    print("Test result saved as 'test_result.png' in the main folder")
 
 # security - starting test() function only when this file is called
 if __name__ == "__main__":
