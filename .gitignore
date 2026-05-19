@@ -3,7 +3,7 @@ venv/
 env/
 
 # Dane i modele
-data/
+/data/
 *.pt
 *.pth
 *.h5
