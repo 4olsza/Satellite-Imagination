@@ -37,7 +37,7 @@ if __name__ == "__main__":
     print("Wczytywanie datasetu...")
 
     dataset = MapDataset(
-        root_dir="/data/train"
+        root_dir="data/train"
     )  # Pamiętaj o ścieżce do folderu z obrazkami!
 
     # Bierzemy tylko jeden zestaw danych do testu
