@@ -133,7 +133,6 @@ class Generator(nn.Module):
         up5 = self.up5(torch.cat([up4, d4], dim=1))
         up6 = self.up6(torch.cat([up5, d3], dim=1))
         up7 = self.up7(torch.cat([up6, d2], dim=1))
-
         # Ostatnie złączenie i zwrot gotowego, wygenerowanego obrazka satelitarnego
         return self.final_up(torch.cat([up7, d1], dim=1))
 
