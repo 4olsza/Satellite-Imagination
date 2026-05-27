@@ -27,3 +27,56 @@ class CNNBlock(nn.Module):
 
     def forward(self, x):
         return self.conv(x)
+
+class Discriminator(nn.Module):
+    def __init__(self, in_channels=3, features=[64, 128, 256, 512]):
+        super().__init__()
+
+        # initial layer - skipping BatchNorm at first to keep the input colors (adding mathematics will distort them)
+        self.initial = nn.Sequential(
+            nn.Conv2d(
+                in_channels * 2, # channels from two pictures - sketch and satellite,
+                out_channels=features[0], # 64 channels
+                kernel_size=4,
+                stride=2,
+                padding=1,
+                padding_mode="reflect"
+            ),
+            nn.LeakyReLU(0.2)
+        )
+
+        # core layer
+        self.core = nn.Sequential(
+            # channels: 64 -> 128, size of the picture reduced by half
+            CNNBlock(features[0], features[1], stride=2),
+
+            # channels: 128 -> 256, size reduced by a half
+            CNNBlock(features[1], features[2], stride=2),
+
+            # channels: 256 -> 512, size of the picture is small enough - no need to reduce it
+            CNNBlock(features[2], features[3], stride=1)
+        )
+
+        # final layer - reduces 512 channels to just 1 (true/false rating matrix)
+        self.final = nn.Conv2d(
+            in_channels=features[3],
+            out_channels=1,
+            kernel_size=4,
+            stride=1,
+            padding=1,
+            padding_mode="reflect"
+        )
+    
+    def forward(self, x, y):
+        # x: input (map's sketch)
+        # y: judged picture (satellite view)
+
+        # creating one block from two pictures
+        merged = torch.cat([x,y], dim=1) # dim=1 -> bonding along the channels
+
+        # putting merged block into discriminator
+        initial_out = self.initial(merged)
+        core_out = self.core(initial_out)
+        final_out = self.final(core_out)
+
+        return final_out
