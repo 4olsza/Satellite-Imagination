@@ -1,13 +1,24 @@
 import torch
 import torch.nn as nn
+from typing import List
 
 
 # ==========================================
 # 1. Klasa pomocnicza Block ("Klocek LEGO")
 # ==========================================
 class Block(nn.Module):
+    """
+    Uniwersalny blok dla sieci neuronowej.
+    Może być w dół (Conv2d) lub w górę (ConvTranspose2d).
+    """
+
     def __init__(
-        self, in_channels, out_channels, down=True, act="relu", use_dropout=False
+        self,
+        in_channels: int,
+        out_channels: int,
+        down: bool = True,
+        act: str = "relu",
+        use_dropout: bool = False,
     ):
         super().__init__()
         # Jeśli down=True, robimy konwolucję (zmniejszanie obrazu w koderze)
@@ -38,7 +49,7 @@ class Block(nn.Module):
         self.use_dropout = use_dropout
         self.dropout = nn.Dropout(0.5)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.conv(x)
         x = self.bn(x)
         x = self.act(x)
@@ -49,7 +60,12 @@ class Block(nn.Module):
 # Główna sieć Generatora (U-Net)
 # ==========================================
 class Generator(nn.Module):
-    def __init__(self, in_channels=3, features=64):
+    """
+    Generator dla Pix2Pix - U-Net architektura.
+    Mapuje obraz wejściowy (mapę) na obraz wyjściowy (satelitę).
+    """
+
+    def __init__(self, in_channels: int = 3, features: int = 64):
         super().__init__()
 
         # ------------------------------------------
@@ -113,7 +129,16 @@ class Generator(nn.Module):
     # ------------------------------------------
     # 4. Skip Connections (metoda forward)
     # ------------------------------------------
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Forward pass przez U-Net.
+
+        Args:
+            x: Input tensor - shape: [Batch, in_channels, H, W]
+
+        Returns:
+            Output tensor - shape: [Batch, 3, H, W]
+        """
         # Przepuszczamy sygnał przez koder i ZAPISUJEMY wyniki każdej warstwy
         d1 = self.initial_down(x)
         d2 = self.down1(d1)
