@@ -11,3 +11,5 @@ data/
 # Śmieci Pythona
 __pycache__/
 *.pyc
+
+.vscode/
