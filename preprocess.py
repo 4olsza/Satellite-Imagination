@@ -52,9 +52,7 @@ class DataPreprocessor:
 
             # Musi mieć co najmniej min_size
             if width < self.min_size[0] or height < self.min_size[1]:
-                self.stats["errors"].append(
-                    f"{img_path}: Zbyt mały ({width}x{height})"
-                )
+                self.stats["errors"].append(f"{img_path}: Zbyt mały ({width}x{height})")
                 return False
 
             # Musi być podzielny na 2 (mapa i satelita)
@@ -81,7 +79,8 @@ class DataPreprocessor:
         """
         data_path = Path(data_dir)
         image_files = [
-            f for f in data_path.iterdir()
+            f
+            for f in data_path.iterdir()
             if f.suffix.lower() in [".jpg", ".png", ".jpeg"]
         ]
 

@@ -58,7 +58,9 @@ class ImageMetrics:
         return psnr_val.item()
 
     @staticmethod
-    def ssim(real: torch.Tensor, generated: torch.Tensor, window_size: int = 11) -> float:
+    def ssim(
+        real: torch.Tensor, generated: torch.Tensor, window_size: int = 11
+    ) -> float:
         """
         Structural Similarity Index.
         Mierzy podobieństwo strukturalne (zazwyczaj 0-1, wyżej = lepiej).
@@ -83,19 +85,18 @@ class ImageMetrics:
         mean_gen = F.avg_pool2d(generated, window_size, stride=1)
 
         # Wariancja
-        sq_real = F.avg_pool2d(real ** 2, window_size, stride=1)
-        sq_gen = F.avg_pool2d(generated ** 2, window_size, stride=1)
-        sigma_real_sq = sq_real - mean_real ** 2
-        sigma_gen_sq = sq_gen - mean_gen ** 2
+        sq_real = F.avg_pool2d(real**2, window_size, stride=1)
+        sq_gen = F.avg_pool2d(generated**2, window_size, stride=1)
+        sigma_real_sq = sq_real - mean_real**2
+        sigma_gen_sq = sq_gen - mean_gen**2
         sigma_real_gen = F.avg_pool2d(real * generated, window_size, stride=1) - (
             mean_real * mean_gen
         )
 
         # SSIM
         numerator = (2 * mean_real * mean_gen + C1) * (2 * sigma_real_gen + C2)
-        denominator = (
-            (mean_real ** 2 + mean_gen ** 2 + C1)
-            * (sigma_real_sq + sigma_gen_sq + C2)
+        denominator = (mean_real**2 + mean_gen**2 + C1) * (
+            sigma_real_sq + sigma_gen_sq + C2
         )
 
         ssim_val = numerator / denominator
@@ -144,7 +145,7 @@ class ImageMetrics:
         """
         Learned Perceptual Image Patch Similarity.
         Wyżej = bardziej różne (zazwyczaj 0-1).
-        
+
         UWAGA: Ta implementacja jest uproszczona!
         Dla pełnej wersji użyj: pip install lpips
 
@@ -184,15 +185,14 @@ class ImageMetrics:
             edge_gen_y = F.conv2d(channel_gen, kernel_y, padding=1)
 
             diff += torch.mean(
-                torch.abs(edge_real_x - edge_gen_x) + torch.abs(edge_real_y - edge_gen_y)
+                torch.abs(edge_real_x - edge_gen_x)
+                + torch.abs(edge_real_y - edge_gen_y)
             )
 
         return (diff / real.shape[1]).item()
 
     @staticmethod
-    def compute_all_metrics(
-        real: torch.Tensor, generated: torch.Tensor
-    ) -> dict:
+    def compute_all_metrics(real: torch.Tensor, generated: torch.Tensor) -> dict:
         """
         Oblicza wszystkie metryki naraz.
 

@@ -158,9 +158,7 @@ class Pix2PixInference:
 
         logger.info(f"✓ Generowanie zakończone! Wyniki w: {output_dir}")
 
-    def generate_comparison(
-        self, image_path: str, output_path: str
-    ) -> None:
+    def generate_comparison(self, image_path: str, output_path: str) -> None:
         """
         Generuje porównanie: input | output.
 
@@ -201,8 +199,12 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="Pix2Pix Inference")
-    parser.add_argument("--checkpoint", type=str, required=True, help="Path to checkpoint")
-    parser.add_argument("--input", type=str, required=True, help="Input image or folder")
+    parser.add_argument(
+        "--checkpoint", type=str, required=True, help="Path to checkpoint"
+    )
+    parser.add_argument(
+        "--input", type=str, required=True, help="Input image or folder"
+    )
     parser.add_argument("--output", type=str, default="./output", help="Output folder")
     parser.add_argument("--device", type=str, default="cuda", help="cuda or cpu")
 
@@ -227,7 +229,8 @@ def main():
     elif input_path.is_dir():
         # Wiele obrazów
         image_files = [
-            f for f in input_path.iterdir()
+            f
+            for f in input_path.iterdir()
             if f.suffix.lower() in [".jpg", ".png", ".jpeg"]
         ]
 
