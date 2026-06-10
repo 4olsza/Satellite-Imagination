@@ -7,6 +7,7 @@ from tqdm import tqdm # for showing progress bar in terminal
 from src.data.dataset import MapDataset
 from src.models.generator import Generator
 from src.models.discriminator import Discriminator
+from src.utils import save_checkpoint, save_some_examples
 
 # hyperparameters
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
@@ -90,6 +91,13 @@ def main():
                 D_loss = loss_D.item(),
                 G_loss = loss_G.item(),
             )
+
+            # saving sample images in order to see how the model learns
+            save_some_examples(generator, dataloader, epoch, folder="saved_images", device=DEVICE)
+
+            # saving weights in the case of sudden stop of training
+            save_checkpoint(model=generator, optimizer=opt_generator, filename="generator_weights.pth.tar")
+            save_checkpoint(model=discriminator, optimizer=opt_discriminator, filename="discriminator_weights.pth.tar")
 
 # security check - allowing code to start only when calling the file
 if __name__ == "__main__":
