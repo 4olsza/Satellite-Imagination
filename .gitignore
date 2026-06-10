@@ -3,10 +3,12 @@ venv/
 env/
 
 # Dane i modele
-data/
+/data/
+__pycache__/
 *.pt
 *.pth
 *.h5
+test_result.png
 
 # Śmieci Pythona
 __pycache__/
