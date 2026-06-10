@@ -19,7 +19,7 @@ def main():
 
     # initializing models and sending them to the GPU
     discriminator = Discriminator(in_channels=3).to(DEVICE)
-    generator = Generator(in_channels=3, out_channels=3).to(DEVICE)
+    generator = Generator(in_channels=3).to(DEVICE)
 
     # preparing data (dataset and dataloader)
     dataset = MapDataset(root_dir="data/maps/train")
