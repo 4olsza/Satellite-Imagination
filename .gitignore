@@ -13,3 +13,5 @@ test_result.png
 # Śmieci Pythona
 __pycache__/
 *.pyc
+
+.vscode/
