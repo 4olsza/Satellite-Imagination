@@ -36,9 +36,9 @@ def save_some_examples(generator, dataloader, epoch, folder="saved_images", devi
         y_original = y * 0.5 + 0.5
 
         # saving images
-        torchvision.utils.save_image(x_input[0], f"{folder}/epoch_{epoch}_1_sketch.png")
-        torchvision.utils.save_image(y_generated[0], f"{folder}/epoch_{epoch}_2_generated.png")
-        torchvision.utils.save_image(y_original[0], f"{folder}/epoch_{epoch}_3_original.png")
+        torchvision.utils.save_image(x_input[0], f"{folder}/epoch_{epoch:03d}_1_sketch.png")
+        torchvision.utils.save_image(y_generated[0], f"{folder}/epoch_{epoch:03d}_2_generated.png")
+        torchvision.utils.save_image(y_original[0], f"{folder}/epoch_{epoch:03d}_3_original.png")
 
     # switching to training mode again
     generator.train()
