@@ -24,7 +24,7 @@ def main():
 
     # preparing data (dataset and dataloader)
     dataset = MapDataset(root_dir="data/maps/train")
-    dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True)
+    dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=2, pin_memory=True)
 
     print(f"Data prepared. There are {len(dataloader)} batches to work on")
 
