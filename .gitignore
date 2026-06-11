@@ -11,6 +11,7 @@ env/
 
 # Generated text files and preview
 saved_images/
+checkpoints/
 test_result.png
 
 # Python trash 

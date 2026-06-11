@@ -3,15 +3,20 @@ import torchvision
 import os
 
 # CHECKPOINT FUNCTION: saving progress after each epoch for ability to resume training
-def save_checkpoint(model, optimizer, filename="checkpoints.pth.tar"):
-    print(f"=> Saving weights to {filename}")
+def save_checkpoint(model, optimizer, folder="checkpoints", filename="checkpoint.pth.tar"):
+    # creating folder if it doesn't exist yet
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    
+    filepath = os.path.join(folder, filename)
+    print(f"=> Saving weights to {filepath}")
 
     checkpoint = {
         "state_dict": model.state_dict(), # state_dict => dictionary of all weights learned by now
         "optimizer": optimizer.state_dict(), # saving state of optimizer in order to smoothly restart the training
     }
 
-    torch.save(checkpoint, filename)
+    torch.save(checkpoint, filepath)
 
 # SAVING RESULTS FUNCTION: saving photos during training to check quality of generated images
 def save_some_examples(generator, dataloader, epoch, folder="saved_images", device="cuda"):

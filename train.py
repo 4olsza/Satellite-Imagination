@@ -96,8 +96,18 @@ def main():
             save_some_examples(generator, dataloader, epoch, folder="saved_images", device=DEVICE)
 
             # saving weights in the case of sudden stop of training
-            save_checkpoint(model=generator, optimizer=opt_generator, filename="generator_weights.pth.tar")
-            save_checkpoint(model=discriminator, optimizer=opt_discriminator, filename="discriminator_weights.pth.tar")
+            save_checkpoint(
+                model=generator,
+                optimizer=opt_generator, 
+                folder="checkpoints",
+                filename=f"generator_epoch_{epoch:03d}.pth.tar"
+                )
+            save_checkpoint(
+                model=discriminator,
+                optimizer=opt_discriminator,
+                folder="checkpoints",
+                filename=f"discriminator_epoch_{epoch:03d}.pth.tar"
+                )
 
 # security check - allowing code to start only when calling the file
 if __name__ == "__main__":
