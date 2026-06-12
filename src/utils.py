@@ -20,7 +20,7 @@ def save_checkpoint(model, optimizer, folder="checkpoints", filename="checkpoint
 
 # SAVING RESULTS FUNCTION: saving photos during training to check quality of generated images
 def save_some_examples(generator, dataloader, epoch, folder="saved_images", device="cuda"):
-    print("=> Saving sample preview images")
+    print("\n=> Saving sample preview images")
 
     # creating folder if one doesn't exist
     if not os.path.exists(folder):
