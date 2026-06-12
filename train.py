@@ -37,7 +37,7 @@ def main():
     l1_loss = nn.L1Loss()
 
     #L1 weight
-    L1_LAMBDA = 150
+    L1_LAMBDA = 100
 
     # Optimizers
     opt_discriminator = optim.Adam(discriminator.parameters(), lr=LEARNING_RATE, betas=(0.5, 0.999))
@@ -100,13 +100,13 @@ def main():
                 model=generator,
                 optimizer=opt_generator, 
                 folder="checkpoints",
-                filename=f"generator_epoch_{epoch:03d}.pth.tar"
+                filename=f"generator_epoch_{epoch+1:03d}.pth.tar"
                 )
             save_checkpoint(
                 model=discriminator,
                 optimizer=opt_discriminator,
                 folder="checkpoints",
-                filename=f"discriminator_epoch_{epoch:03d}.pth.tar"
+                filename=f"discriminator_epoch_{epoch+1:03d}.pth.tar"
                 )
 
 # security check - allowing code to start only when calling the file
