@@ -9,7 +9,7 @@ def save_checkpoint(model, optimizer, folder="checkpoints", filename="checkpoint
         os.makedirs(folder)
     
     filepath = os.path.join(folder, filename)
-    print(f"\n=> Saving weights to {filepath}")
+    print(f"=> Saving weights to {filepath}")
 
     checkpoint = {
         "state_dict": model.state_dict(), # state_dict => dictionary of all weights learned by now
@@ -20,7 +20,7 @@ def save_checkpoint(model, optimizer, folder="checkpoints", filename="checkpoint
 
 # SAVING RESULTS FUNCTION: saving photos during training to check quality of generated images
 def save_some_examples(generator, dataloader, epoch, folder="saved_images", device="cuda"):
-    print("\n=> Saving sample preview images")
+    print("=> Saving sample preview images")
 
     # creating folder if one doesn't exist
     if not os.path.exists(folder):
