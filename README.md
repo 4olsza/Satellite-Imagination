@@ -1,179 +1,109 @@
 # Satellite-Imagination
 
-**Map-to-Satellite Image Translation using Conditional GANs (Pix2PIx)...**
+Projekt Pix2Pix do przekształcania map w obrazy satelitarne.
 
-## 📋 Struktura Projektu
+## 📋 Struktura projektu
 
 ```
-├── train.py                 # Główny skrypt treningu
-├── config.py                # Konfiguracja hyperparametrów
-├── dataset.py               # Dataset loader
-├── dataset.py               # Dataset class
-├── requirements.txt         # Zależności
-├── src/
-│   ├── __init__.py
-│   ├── utilis.py           # MLOpsManager (checkpoints, examples)
-│   ├── losses.py           # Loss functions (GAN + L1)
-│   ├── visualize.py        # Funkcje do wizualizacji
-│   └── models/
-│       ├── __init__.py
-│       ├── generator.py    # Generator (U-Net)
-│       └── discriminator.py # Discriminator (PatchGAN)
-└── data/
-    └── train/              # Dane treningowe
+Satellite-Imagination/
+├── README.md
+├── LICENSE
+├── requirements.txt
+├── augmentation.py        # Augmentacje obrazów mapy + satelita
+├── dataset.py             # Główny loader danych dla treningu
+├── inference.py           # Skrypt inferencji generujący obrazy satelitarne
+├── metrics.py             # Metryki ewaluacji wygenerowanych obrazów
+├── README.md              # Ten plik
+├── .gitignore
+├── .venv/                 # Virtualenv (nie wersjonujemy)
+├── data/
+│   └── train/             # Dane treningowe
+└── src/
+    ├── visualize.py       # Prosta wizualizacja par obrazów
+    └── data/
+        └── dataset.py     # Dataset klasowy (mapa + satelita)
+    └── models/
+        └── generator.py   # Generator U-Net
 ```
 
-## 🚀 Quick Start
+> Uwaga: plik `preprocess.py` został usunięty, ponieważ loader danych `dataset.py` wystarcza dla gotowego zbioru obrazów.
 
-### 1. Instalacja Zależności
+## 🚀 Szybki start
+
+1. Aktywuj środowisko Pythona:
+
+```bash
+source .venv/bin/activate
+```
+
+2. Zainstaluj wymagania:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Przygotowanie Danych
+3. Przygotuj dane w `data/train/`.
+   - Każdy plik powinien zawierać parę obrazów:
+   - lewa połowa: satelita
+   - prawa połowa: mapa
+   - szerokość musi być parzysta, wysokość co najmniej 256 px
 
-Umieść obrazy treningowe w `data/train/`. 
-Każdy obraz powinien zawierać mapę po lewej i satelitę po prawej stronie (podzielone pionową linią).
+4. Uruchom trening lub inferencję zgodnie z istniejącymi skryptami.
 
-```
-data/
-└── train/
-    ├── image1.jpg
-    ├── image2.jpg
-    └── ...
-```
+## 🧩 Dane treningowe
 
-### 3. Uruchomienie Treningu
+Format danych:
+
+- Obraz wejściowy ma dwie części połączone poziomo.
+- Lewa połowa to prawdziwy obraz satelitarny.
+- Prawa połowa to odpowiadająca mu mapa/sketch.
+
+Dataset loader w `dataset.py`:
+- wczytuje obrazy RGB,
+- dzieli je na dwie części,
+- normalizuje do przedziału `[-1, 1]`.
+
+## 🧠 Model
+
+W projekcie jest:
+
+- `src/models/generator.py` — generator w stylu U-Net,
+- brak klasycznego dyskryminatora w kodzie głównym.
+
+Generator:
+- Wejście: mapa 256x256 RGB,
+- Wyjście: obraz satelitarny 256x256 RGB,
+- Dekoder używa `Upsample + Conv2d`, co redukuje artefakty "szachownicy".
+
+## 🔧 Inferencja
+
+Skrypt `inference.py`:
+- ładuje wytrenowany checkpoint,
+- przekształca pojedynczy obraz mapy lub cały folder,
+- zapisuje wygenerowane obrazy do `./output/`.
+
+Przykład uruchomienia:
 
 ```bash
-python train.py
+python inference.py --checkpoint path/to/checkpoint.pth --input data/test/mapa.png --output output/
 ```
 
-Trening będzie:
-- Zapisywać checkpointy co 500 kroków w `./checkpoints/`
-- Zapisywać przykłady co 100 kroków w `./examples/`
-- Czyścić stare checkpointy (zachowując 5 ostatnich)
+## 📊 Ewaluacja
 
-### 4. Wznowienie Treningu z Checkpointa
+Plik `metrics.py` udostępnia metryki:
+- `psnr()`,
+- `ssim()`,
+- `mae()`,
+- `mse()`.
 
-Trening automatycznie wznawia się z ostatniego checkpointa. Jeśli chcesz zacząć od nowa:
+Użycie metryk jest proste: porównaj rzeczywisty obraz satelitarny z wygenerowanym.
 
-```bash
-rm -rf checkpoints/
-python train.py
-```
+## 📌 Uwagi
 
-## ⚙️ Konfiguracja
-
-Edytuj `config.py`:
-
-```python
-from config import get_full_config
-
-config = get_full_config()
-config.batch_size = 32  # Zwiększ batch size
-config.num_epochs = 200  # Trenuj dłużej
-config.lambda_l1 = 50.0  # Mniej L1 loss
-```
-
-### Presets
-
-```python
-from config import get_small_config, get_full_config
-
-# Szybki test
-config = get_small_config()  # 4 batch, 5 epok
-
-# Pełny trening
-config = get_full_config()   # 16 batch, 100 epok
-```
-
-## 📊 Monitorowanie Treningu
-
-### Checkpointy
-
-```python
-from src.utilis import MLOpsManager
-
-mlops = MLOpsManager()
-mlops.list_checkpoints()  # Wyświetl dostępne checkpointy
-```
-
-### Przykłady
-
-Wygenerowane przykłady są zapisywane w `./examples/` co 100 kroków.
-Format: `[Mapa | Rzeczywisty Satelita | Wygenerowany Satelita]`
-
-## 🔧 Kluczowe Komponenty
-
-### Generator (U-Net)
-- Input: Mapa (256x256 RGB)
-- Output: Satelita (256x256 RGB)
-- Encoder-decoder z skip connections
-
-### Discriminator (PatchGAN)
-- Input: Mapa + Satelita (konkatenacja)
-- Output: Patch-wise klasyfikacja
-- Lepsze uczenie szczegółów lokalnych
-
-### Loss Functions
-
-1. **GAN Loss** (Binary Cross Entropy)
-   - Zmusza generatora do tworzenia realistycznych obrazów
-
-2. **L1 Reconstruction Loss** (λ=100)
-   - Zmusza generatora do pixel-wise podobieństwa
-   - Zapobiega rozmytym wynikiem
-
-### MLOpsManager
-
-- `save_checkpoint()` - Zapisuje model + optimizer state
-- `load_checkpoint()` - Wczytuje model + optimizer state
-- `save_some_examples()` - Zapisuje co 100 kroków
-- `cleanup_old_checkpoints()` - Usuwa stare checkpointy
-
-## 📈 Hyperparametry
-
-| Parametr | Wartość | Opis |
-|----------|---------|------|
-| `learning_rate_gen` | 2e-4 | Learning rate generatora |
-| `learning_rate_disc` | 2e-4 | Learning rate dyskryminatora |
-| `lambda_l1` | 100.0 | Waga L1 reconstruction loss |
-| `batch_size` | 16 | Rozmiar batcha |
-| `num_epochs` | 100 | Liczba epok |
-| `save_checkpoint_every` | 500 | Co ile kroków zapis checkpoint |
-| `save_examples_every` | 100 | Co ile kroków zapis przykładów |
-
-## 🐛 Troubleshooting
-
-### Błąd: "Brak obrazów w folderze"
-```
-Upewnij się że:
-1. Folder data/train/ istnieje
-2. Zawiera obrazy (.jpg, .png, .jpeg)
-3. Obrazy mają co najmniej 256x256 px
-```
-
-### Błąd: "Out of Memory"
-```python
-# Zmniejsz batch size w config.py
-config.batch_size = 8  # zamiast 16
-```
-
-### Generator generuje szare/rozmyte obrazy
-```
-Zwiększ lambda_l1 lub trenuj dłużej
-config.lambda_l1 = 200.0
-config.num_epochs = 200
-```
-
-## 📚 Referencje
-
-- Pix2Pix Paper: https://arxiv.org/abs/1611.05957
-- PyTorch: https://pytorch.org/
-- U-Net: https://arxiv.org/abs/1505.04597
+- Jeśli Twoja baza jest już przygotowana i działa, nie musisz używać żadnego preprocessu.
+- `dataset.py` sam poradzi sobie z podstawowym formatem pary obrazów.
+- Jeśli później dodamy surowe dane, można przywrócić lub napisać prosty skrypt przygotowawczy.
 
 ## 👨‍💻 Autor
 
-Maciej - Gałąź: `maciek`
+Maciej

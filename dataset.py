@@ -25,17 +25,17 @@ class MapDataset(Dataset):
         is_train: bool = True,
     ):
         """
-        Args:
-            root_dir: Ścieżka do folderu z danymi
-            valid_extensions: Dozwolone rozszerzenia plików
-            augmentation: Callable augmentation function (z augmentation.py)
-            is_train: Czy to dataset treningowy (dla augmentacji)
+Argumenty:
+            root_dir: Ścieżka do folderu z danymi.
+            valid_extensions: Dozwolone rozszerzenia plików.
+            augmentation: Funkcja augmentacji par obrazów.
+            is_train: Czy to zestaw treningowy.
         """
         self.root_dir = Path(root_dir)
         self.augmentation = augmentation
         self.is_train = is_train
 
-        # Wczytanie listy plików z wylądowaniem plików ukrytych
+        # Wczytanie listy plików, pomijając ukryte pliki
         self.list_files = [
             f
             for f in os.listdir(self.root_dir)
@@ -61,46 +61,42 @@ class MapDataset(Dataset):
         )
 
     def __len__(self):
-        # returning number of the images
+        # Zwraca liczbę obrazów w datasetcie
         return len(self.list_files)
 
     def __getitem__(self, index):
-        # getting file's name
+        # Pobranie nazwy pliku po indeksie
         img_file = self.list_files[index]
 
-        # getting full path
+        # Pełna ścieżka do pliku
         img_path = os.path.join(self.root_dir, img_file)
 
         try:
-            # opening the image using PIL (RGB ensures us of having three colour channels)
+            # Wczytanie obrazu jako RGB
             image = Image.open(img_path).convert("RGB")
 
-            # Validacja rozmiaru - obraz powinien być parzysty żeby można było go podzielić
+            # Walidacja wymiarów: szerokość musi być parzysta, a wysokość co najmniej 256
             width, height = image.size
             if width % 2 != 0 or height < 256:
                 logger.warning(
                     f"Obraz {img_file} ma niestandartowe wymiary: {width}x{height}"
                 )
-                # Resize do standardu jeśli to konieczne
                 width = (width // 2) * 2
                 height = max(height, 256)
                 image = image.resize((width, height))
 
-            # data from dataset maps is horizontally concatenated so we need to split it excatly in a half
-            # checking width and height of the image
+            # Obrazy w datasetcie są połączone poziomo, więc dzielimy je na dwie części
             width, height = image.size
 
-            # using crop function to cut the half of the image
-            # satellite image - usually left side
+            # Wycinamy lewą i prawą połowę
             satellite_img = image.crop((0, 0, width // 2, height))
-            # map sketch - usually right side
             map_img = image.crop((width // 2, 0, width, height))
 
-            # putting both images through transforms
+            # Konwertujemy obrazy do tensorów i normalizujemy
             satellite_tensor = self.transform(satellite_img)
             map_tensor = self.transform(map_img)
 
-            # returning data in the tuple - input at first (sketch), then goal (satellite)
+            # Zwracamy najpierw mapę, potem satelitę
             return map_tensor, satellite_tensor
 
         except Exception as e:
