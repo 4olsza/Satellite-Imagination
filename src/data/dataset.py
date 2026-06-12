@@ -2,6 +2,8 @@ import os
 from PIL import Image
 from torch.utils.data import Dataset
 import torchvision.transforms as transforms
+import random
+import torchvision.transforms.functional as TF
 
 class MapDataset(Dataset):
     def __init__(self, root_dir):
@@ -41,6 +43,12 @@ class MapDataset(Dataset):
         satellite_img = image.crop((0, 0, width // 2, height))
         # map sketch - usually right side
         map_img = image.crop((width // 2, 0, width, height))
+
+        # data augmentation: rotating both images with propability of 50% to make training more precise
+        if random.random() > 0.5:
+            # TF.hflip = horizontal flip (horizontal mirror image)
+            satellite_img = TF.hflip(satellite_img)
+            map_img = TF.hflip(map_img)
 
         # putting both images through transforms
         satellite_tensor = self.transform(satellite_img)
