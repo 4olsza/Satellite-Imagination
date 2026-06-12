@@ -1,15 +1,23 @@
-# Środowiska wirtualne
+# Virtual environments
 venv/
 env/
 
-# Dane i modele
-data/
+# Data and models
+/data/
 *.pt
 *.pth
+*.pth.tar
 *.h5
 
-# Śmieci Pythona
+# Generated text files and preview
+saved_images/
+checkpoints/
+test_result.png
+
+# Python trash 
 __pycache__/
 *.pyc
 
+# Code editors file
 .vscode/
+.idea/
