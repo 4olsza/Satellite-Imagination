@@ -1,109 +1,125 @@
 # Satellite-Imagination
 
-Projekt Pix2Pix do przekształcania map w obrazy satelitarne.
+Projekt Pix2Pix do generowania obrazów satelitarnych z map przy pomocy sieci neuronowych (GAN).
 
-## 📋 Struktura projektu
+## Opis
 
-```
-Satellite-Imagination/
-├── README.md
-├── LICENSE
-├── requirements.txt
-├── augmentation.py        # Augmentacje obrazów mapy + satelita
-├── dataset.py             # Główny loader danych dla treningu
-├── inference.py           # Skrypt inferencji generujący obrazy satelitarne
-├── metrics.py             # Metryki ewaluacji wygenerowanych obrazów
-├── README.md              # Ten plik
-├── .gitignore
-├── .venv/                 # Virtualenv (nie wersjonujemy)
-├── data/
-│   └── train/             # Dane treningowe
-└── src/
-    ├── visualize.py       # Prosta wizualizacja par obrazów
-    └── data/
-        └── dataset.py     # Dataset klasowy (mapa + satelita)
-    └── models/
-        └── generator.py   # Generator U-Net
-```
+Model uczy się transformować mapy w obrazy satelitarne. Używamy warunkowego GAN-a (cGAN) z generatorem U-Net i dyskryminatorem. Generator generuje obrazy, a dyskryminator uczy się je oceniać.
 
-> Uwaga: plik `preprocess.py` został usunięty, ponieważ loader danych `dataset.py` wystarcza dla gotowego zbioru obrazów.
+## Wymagania
 
-## 🚀 Szybki start
+- Python 3.8+
+- PyTorch z CUDA (lub CPU)
+- GPU (opcjonalnie, znacznie przyspiesza trening)
 
-1. Aktywuj środowisko Pythona:
+## Instalacja
 
 ```bash
+git clone https://github.com/4olsza/Satellite-Imagination.git
+cd Satellite-Imagination
+python3 -m venv .venv
 source .venv/bin/activate
-```
-
-2. Zainstaluj wymagania:
-
-```bash
 pip install -r requirements.txt
 ```
 
-3. Przygotuj dane w `data/train/`.
-   - Każdy plik powinien zawierać parę obrazów:
-   - lewa połowa: satelita
-   - prawa połowa: mapa
-   - szerokość musi być parzysta, wysokość co najmniej 256 px
+## Format danych
 
-4. Uruchom trening lub inferencję zgodnie z istniejącymi skryptami.
+Dane treningowe to obrazy ze złączonymi poziomo parami:
+- **Lewa połowa**: obraz satelitarny
+- **Prawa połowa**: mapa/sketch
+- **Rozmiar**: co najmniej 256 px wysokości, szerokość parzysta (będą przeskalowane do 256x256)
+- **Ścieżka**: `data/maps/train/`
 
-## 🧩 Dane treningowe
-
-Format danych:
-
-- Obraz wejściowy ma dwie części połączone poziomo.
-- Lewa połowa to prawdziwy obraz satelitarny.
-- Prawa połowa to odpowiadająca mu mapa/sketch.
-
-Dataset loader w `dataset.py`:
-- wczytuje obrazy RGB,
-- dzieli je na dwie części,
-- normalizuje do przedziału `[-1, 1]`.
-
-## 🧠 Model
-
-W projekcie jest:
-
-- `src/models/generator.py` — generator w stylu U-Net,
-- brak klasycznego dyskryminatora w kodzie głównym.
-
-Generator:
-- Wejście: mapa 256x256 RGB,
-- Wyjście: obraz satelitarny 256x256 RGB,
-- Dekoder używa `Upsample + Conv2d`, co redukuje artefakty "szachownicy".
-
-## 🔧 Inferencja
-
-Skrypt `inference.py`:
-- ładuje wytrenowany checkpoint,
-- przekształca pojedynczy obraz mapy lub cały folder,
-- zapisuje wygenerowane obrazy do `./output/`.
-
-Przykład uruchomienia:
-
-```bash
-python inference.py --checkpoint path/to/checkpoint.pth --input data/test/mapa.png --output output/
+Przykład:
+```
+data/maps/train/
+├── mapa1.png    (512x256: satelita | mapa)
+├── mapa2.png    (512x256: satelita | mapa)
+└── ...
 ```
 
-## 📊 Ewaluacja
+## Sposób działania
 
-Plik `metrics.py` udostępnia metryki:
-- `psnr()`,
-- `ssim()`,
-- `mae()`,
-- `mse()`.
+1. **Trening**: Generator uczy się generować realizm poprzez dwie straty:
+   - Strata adversarialna (BCE): czy dyskryminator je rozróżni
+   - Strata L1: zgodność pixel-po-pixelu z obrazem rzeczywistym
 
-Użycie metryk jest proste: porównaj rzeczywisty obraz satelitarny z wygenerowanym.
+2. **Inferencja**: Wytrenowany generator transformuje mapę w obraz satelitarny
 
-## 📌 Uwagi
+3. **Architektura**:
+   - Generator: U-Net z skip connections (encoder-decoder)
+   - Dyskryminator: PatchGAN (ocenia fragmenty obrazu)
 
-- Jeśli Twoja baza jest już przygotowana i działa, nie musisz używać żadnego preprocessu.
-- `dataset.py` sam poradzi sobie z podstawowym formatem pary obrazów.
-- Jeśli później dodamy surowe dane, można przywrócić lub napisać prosty skrypt przygotowawczy.
+## Uruchomienie
 
-## 👨‍💻 Autor
+### Trening
 
-Maciej
+```bash
+python train.py
+```
+
+Parametry (w `train.py`):
+- Learning rate: 2e-4
+- Batch size: 16
+- Epoki: 100
+- L1 loss weight: 150
+
+Zapisuje:
+- Checkpointy: `checkpoints/generator_epoch_*.pth.tar`
+- Przykładowe wygenerowane obrazy: `saved_images/`
+
+### Inferencja
+
+```bash
+python inference.py --checkpoint checkpoints/generator_epoch_050.pth.tar --input map.png --output results/
+```
+
+Generuje obrazy satelitarne z map (pojedyncze zdjęcie lub folder).
+
+### Testy
+
+```bash
+python test.py
+```
+
+Sprawdza poprawność wczytywania danych i modelu.
+
+## Możliwości
+
+- Generowanie realistycznych obrazów satelitarnych z map
+- Ewaluacja metrykami: PSNR, SSIM, MAE, MSE (w `metrics.py`)
+- Augmentacja danych (rotacje, flip, color jitter)
+- Wizualizacja par obraz-mapa (skrypt `visualize.py`)
+- Training z checkpointami co epokę
+
+## Struktura
+
+```
+├── train.py              # Trening modelu
+├── inference.py          # Generowanie obrazów
+├── test.py               # Testy
+├── metrics.py            # PSNR, SSIM, MAE, MSE
+├── augmentation.py       # Augmentacja danych
+├── src/
+│   ├── models/           # Generator i Dyskryminator
+│   ├── data/dataset.py   # Loader danych
+│   ├── utils.py          # Helpery (save, examples)
+│   └── visualize.py      # Podgląd danych
+└── data/maps/train/      # Dane treningowe
+```
+
+## Performance
+
+- GPU (RTX 3070): ~15-20 min/epokę
+- Pamięć: ~8GB VRAM
+- CPU: znacznie wolniej (nie rekomendujemy)
+
+## Uwagi
+
+- Model zaktualizowany: dekoder bez artefaktów dzięki Upsample+Conv2d zamiast ConvTranspose2d
+- Wymaga dużego, różnorodnego zbioru treningowego (mode collapse ze małymi zbiorami)
+- Learning rate wrażliwy - domyślny 2e-4 jest wytunowany empirycznie
+
+## Autorzy
+
+Maciej, Krzysztof
