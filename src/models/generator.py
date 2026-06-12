@@ -108,6 +108,8 @@ class Generator(nn.Module):
         self.final_up = nn.Sequential(
             nn.Upsample(scale_factor=2, mode="bilinear", align_corners=False),
             nn.Conv2d(features * 2, 3, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(3),
+            nn.ReLU(),
             nn.Tanh(),  # Tanh normalizuje piksele do [-1, 1]
         )
 
