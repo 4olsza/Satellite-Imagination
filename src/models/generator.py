@@ -22,7 +22,7 @@ class Block(nn.Module):
     ):
         super().__init__()
         # Jeśli down=True, używamy zwykłej Conv2d do zmniejszenia wymiaru.
-        # Jeśli down=False, używamy Upsample+Conv2d do bezpiecznego powiększania obrazu.
+        # Jeśli down=False, wracamy do klasycznego ConvTranspose2d do powiększania obrazu.
         self.conv = (
             nn.Conv2d(
                 in_channels,
@@ -34,16 +34,13 @@ class Block(nn.Module):
                 padding_mode="reflect",
             )
             if down
-            else nn.Sequential(
-                nn.Upsample(scale_factor=2, mode="bilinear", align_corners=False),
-                nn.Conv2d(
-                    in_channels,
-                    out_channels,
-                    kernel_size=3,
-                    stride=1,
-                    padding=1,
-                    bias=False,
-                ),
+            else nn.ConvTranspose2d(
+                in_channels,
+                out_channels,
+                kernel_size=4,
+                stride=2,
+                padding=1,
+                bias=False,
             )
         )
 
@@ -106,10 +103,7 @@ class Generator(nn.Module):
 
         # Ostatnia warstwa zamienia kanały na RGB i przywraca oryginalny rozmiar 256x256.
         self.final_up = nn.Sequential(
-            nn.Upsample(scale_factor=2, mode="bilinear", align_corners=False),
-            nn.Conv2d(features * 2, 3, kernel_size=3, stride=1, padding=1),
-            nn.BatchNorm2d(3),
-            nn.ReLU(),
+            nn.ConvTranspose2d(features * 2, 3, kernel_size=4, stride=2, padding=1),
             nn.Tanh(),  # Tanh normalizuje piksele do [-1, 1]
         )
 
@@ -119,9 +113,9 @@ class Generator(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Forward pass przez U-Net z skip connections.
-Argumenty:
+        Argumenty:
             x: Tensor wejściowy [Batch, in_channels, H, W]
-Zwraca:
+        Zwraca:
             Tensor wyjściowy [Batch, 3, H, W]
         """
         d1 = self.initial_down(x)
