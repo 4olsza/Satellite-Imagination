@@ -11,7 +11,8 @@ from src.utils import save_checkpoint, save_some_examples
 
 # hyperparameters
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-LEARNING_RATE = 2e-4
+LEARNING_RATE_DISC = 1e-4
+LEARNING_RATE_GEN = 2e-4
 BATCH_SIZE = 16
 NUM_EPOCHS = 100
 
@@ -40,8 +41,8 @@ def main():
     L1_LAMBDA = 100
 
     # Optimizers
-    opt_discriminator = optim.Adam(discriminator.parameters(), lr=LEARNING_RATE, betas=(0.5, 0.999))
-    opt_generator = optim.Adam(generator.parameters(), lr=LEARNING_RATE, betas=(0.5, 0.999))
+    opt_discriminator = optim.Adam(discriminator.parameters(), lr=LEARNING_RATE_DISC, betas=(0.5, 0.999))
+    opt_generator = optim.Adam(generator.parameters(), lr=LEARNING_RATE_GEN, betas=(0.5, 0.999))
     # parameter betas=(0.5, 0.999) makes chaotic training of GANs more stable
 
     # Training Loop
@@ -60,7 +61,8 @@ def main():
             # STEP A: training discriminator - goal: teach discriminator to give 1 for originals and 0 for generated (false)
             # looking at real pair at first
             D_origin = discriminator(x, y)
-            loss_D_origin = bce_loss(D_origin, torch.ones_like(D_origin)) # we want to have result 1 (True) -> ones_like
+            loss_D_origin = bce_loss(D_origin, torch.ones_like(D_origin) * 0.9) # we want to have result 1 (True) -> ones_like, 
+            # adding label smoothing (* 0.9) in order to achieve stability in learning
 
             # looking at fake pair (sketch + generated image)
             D_generated = discriminator(x, y_fake.detach()) # using detach for training only discriminator
@@ -92,22 +94,22 @@ def main():
                 G_loss = loss_G.item(),
             )
 
-            # saving sample images in order to see how the model learns
-            save_some_examples(generator, dataloader, epoch, folder="saved_images", device=DEVICE)
+        # saving sample images in order to see how the model learns
+        save_some_examples(generator, dataloader, epoch, folder="saved_images", device=DEVICE)
 
-            # saving weights in the case of sudden stop of training
-            save_checkpoint(
-                model=generator,
-                optimizer=opt_generator, 
-                folder="checkpoints",
-                filename=f"generator_epoch_{epoch+1:03d}.pth.tar"
-                )
-            save_checkpoint(
-                model=discriminator,
-                optimizer=opt_discriminator,
-                folder="checkpoints",
-                filename=f"discriminator_epoch_{epoch+1:03d}.pth.tar"
-                )
+        # saving weights in the case of sudden stop of training
+        save_checkpoint(
+            model=generator,
+            optimizer=opt_generator, 
+            folder="checkpoints",
+            filename=f"generator_epoch_{epoch+1:03d}.pth.tar"
+            )
+        save_checkpoint(
+            model=discriminator,
+            optimizer=opt_discriminator,
+            folder="checkpoints",
+            filename=f"discriminator_epoch_{epoch+1:03d}.pth.tar"
+            )
 
 # security check - allowing code to start only when calling the file
 if __name__ == "__main__":
