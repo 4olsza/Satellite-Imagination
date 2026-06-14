@@ -61,8 +61,7 @@ def main():
             # STEP A: training discriminator - goal: teach discriminator to give 1 for originals and 0 for generated (false)
             # looking at real pair at first
             D_origin = discriminator(x, y)
-            loss_D_origin = bce_loss(D_origin, torch.ones_like(D_origin) * 0.9) # we want to have result 1 (True) -> ones_like, 
-            # adding label smoothing (* 0.9) in order to achieve stability in learning
+            loss_D_origin = bce_loss(D_origin, torch.ones_like(D_origin)) # we want to have result 1 (True) -> ones_like
 
             # looking at fake pair (sketch + generated image)
             D_generated = discriminator(x, y_fake.detach()) # using detach for training only discriminator
