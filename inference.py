@@ -67,14 +67,18 @@ Argumenty:
     def _preprocess(self, image_path: str) -> torch.Tensor:
         """
         Przygotowuje obraz wejściowy do inferencji.
-Argumenty:
-            image_path: Ścieżka do pliku obrazu.
-Zwraca:
-            Tensor w kształcie [1, 3, 256, 256].
+        Automatycznie wycina mapę, jeśli obraz wejściowy jest połączony (satelita + mapa).
         """
         img = Image.open(image_path).convert("RGB")
-        img = img.resize((256, 256), Image.BILINEAR)
-        img_tensor = self.transform(img).unsqueeze(0)
+        
+        # Zabezpieczenie przed podaniem surowego obrazka z datasetu
+        width, height = img.size
+        if width > height:  # Jeśli obraz jest prostokątem (np. 512x256)
+            # Mapa zawsze jest po prawej stronie w Waszym datasecie
+            img = img.crop((width // 2, 0, width, height))
+
+        img = img.resize((256, 256)) # Domyślnie użyje Bilinear, bez błędów w IDE
+        img_tensor = self.transform(img).unsqueeze(0) # type: ignore
         return img_tensor.to(self.device)
 
     def _postprocess(self, output_tensor: torch.Tensor) -> Image.Image:
@@ -142,7 +146,7 @@ Argumenty:
         from PIL import ImageDraw
 
         map_img = Image.open(image_path).convert("RGB")
-        map_img = map_img.resize((256, 256), Image.BILINEAR)
+        map_img = map_img.resize((256, 256))
         sat_img = self.predict(image_path)
 
         comparison = Image.new("RGB", (512, 256))
