@@ -101,8 +101,8 @@ class MapDataset(Dataset):
             map_img, satellite_img = self.augmentations(map_img, satellite_img, is_train=True)
         else:
             # Fallback, jeśli ktoś zapomni podać augmentacji (żeby kod się nie wysypał)
-            map_img = TF.resize(map_img, (256, 256), Image.BILINEAR)
-            satellite_img = TF.resize(satellite_img, (256, 256), Image.BILINEAR)
+            map_img = TF.resize(map_img, [256, 256])  # type: ignore
+            satellite_img = TF.resize(satellite_img, [256, 256])  # type: ignore
 
         # Zamiana obrazków na Tensory z zakresem [-1, 1]
         satellite_tensor = self.transform_tensor(satellite_img)
