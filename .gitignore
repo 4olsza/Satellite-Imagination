@@ -13,6 +13,7 @@ env/
 saved_images/
 checkpoints/
 test_result.png
+loss_log.txt
 
 # Python trash 
 __pycache__/
