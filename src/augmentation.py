@@ -34,25 +34,24 @@ class Pix2PixAugmentation:
     ) -> Tuple[Image.Image, Image.Image]:
         
         if not is_train:
-            # Walidacja / test - bez losowych zmian, tylko dopasowanie rozmiaru.
             return self._resize_and_crop(map_img, sat_img)
 
-        # 1. Resize do większego rozmiaru przed cropem.
+        # 1. Resize do większego rozmiaru (286x286)
         map_img, sat_img = self._resize(map_img, sat_img)
 
-        # 2. Losowy crop w tym samym obszarze dla obu obrazów.
-        map_img, sat_img = self._random_crop(map_img, sat_img)
-
-        # 3. Losowe odbicie w poziomie.
-        if random.random() < self.flip_prob:
-            map_img = F.hflip(map_img)  # type: ignore
-            sat_img = F.hflip(sat_img)  # type: ignore
-
-        # 4. Losowa rotacja małym kątem.
+        # 2. Losowa rotacja NA DUŻYM OBRAZIE (zanim wytniemy)
         if random.random() < self.rotation_prob:
             angle = random.uniform(-15, 15)
             map_img = F.rotate(map_img, angle, fill=0)  # type: ignore
             sat_img = F.rotate(sat_img, angle, fill=0)  # type: ignore
+
+        # 3. Dopiero teraz losowy crop do 256x256 (ten krok idealnie odetnie czarne rogi!)
+        map_img, sat_img = self._random_crop(map_img, sat_img)
+
+        # 4. Losowe odbicie w poziomie
+        if random.random() < self.flip_prob:
+            map_img = F.hflip(map_img)  # type: ignore
+            sat_img = F.hflip(sat_img)  # type: ignore
 
         return map_img, sat_img
 
