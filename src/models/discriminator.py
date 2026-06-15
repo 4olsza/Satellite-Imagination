@@ -18,7 +18,7 @@ class CNNBlock(nn.Module):
             ),
 
             # brings the results down to around zero to stabilise the training
-            nn.BatchNorm2d(out_channels),
+            nn.InstanceNorm2d(out_channels)
 
             # function of activation which allows positive values and lets negetive through by multiplaing them by a small number
             # in order to allow information to flow through the network
