@@ -79,7 +79,7 @@ Zwraca:
         #     )
         #     map_img = color_jitter(map_img)
 
-        # return map_img, sat_img
+        return map_img, sat_img
 
     def _resize(
         self, map_img: Image.Image, sat_img: Image.Image
