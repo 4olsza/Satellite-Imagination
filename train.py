@@ -39,7 +39,7 @@ def main():
     l1_loss = nn.L1Loss()
 
     #L1 weight
-    L1_LAMBDA = 100
+    L1_LAMBDA = 10
 
     # Optimizers
     opt_discriminator = optim.Adam(discriminator.parameters(), lr=LEARNING_RATE_DISC, betas=(0.5, 0.999))
@@ -97,6 +97,10 @@ def main():
         # saving sample images in order to see how the model learns
         save_some_examples(generator, dataloader, epoch, folder="saved_images", device=DEVICE)
 
+        # Zapis logów do pliku tekstowego
+        with open("loss_log.txt", "a") as f:
+            f.write(f"Epoch: {epoch+1}/{NUM_EPOCHS} | D_loss: {loss_D.item():.4f} | G_loss: {loss_G.item():.4f}\n")
+        
         # saving weights in the case of sudden stop of training
         save_checkpoint(
             model=generator,
