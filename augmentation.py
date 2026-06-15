@@ -72,14 +72,14 @@ Zwraca:
             map_img = F.rotate(map_img, angle, fill=0)
             sat_img = F.rotate(sat_img, angle, fill=0)
 
-        # 5. Color jitter tylko na mapie, aby nie zmieniać realistycznych kolorów satelity.
-        if random.random() < self.color_jitter_prob:
-            color_jitter = transforms.ColorJitter(
-                brightness=0.2, contrast=0.2, saturation=0.1, hue=0.05
-            )
-            map_img = color_jitter(map_img)
+        # # 5. Color jitter tylko na mapie, aby nie zmieniać realistycznych kolorów satelity.
+        # if random.random() < self.color_jitter_prob:
+        #     color_jitter = transforms.ColorJitter(
+        #         brightness=0.2, contrast=0.2, saturation=0.1, hue=0.05
+        #     )
+        #     map_img = color_jitter(map_img)
 
-        return map_img, sat_img
+        # return map_img, sat_img
 
     def _resize(
         self, map_img: Image.Image, sat_img: Image.Image

@@ -44,7 +44,8 @@ class Block(nn.Module):
             )
         )
 
-        self.bn = nn.BatchNorm2d(out_channels)
+        # KLUCZOWA ZMIANA: InstanceNorm2d zamiast BatchNorm2d
+        self.bn = nn.InstanceNorm2d(out_channels)
         self.act = nn.ReLU() if act == "relu" else nn.LeakyReLU(0.2)
         self.use_dropout = use_dropout
         self.dropout = nn.Dropout(0.5)
@@ -71,7 +72,7 @@ class Generator(nn.Module):
         # ------------------------------------------
         # 2. Koder (Encoder) - schodzimy w dół
         # ------------------------------------------
-        # Pierwsza warstwa nie ma BatchNorm, bo to poprawia stabilność przy wejściu.
+        # Pierwsza warstwa nie ma normalizacji, bo to poprawia stabilność przy wejściu.
         self.initial_down = nn.Sequential(
             nn.Conv2d(in_channels, features, 4, 2, 1, padding_mode="reflect"),
             nn.LeakyReLU(0.2),

@@ -8,7 +8,8 @@ from src.data.dataset import MapDataset
 from src.models.generator import Generator
 from src.models.discriminator import Discriminator
 from src.utils import save_checkpoint, save_some_examples
-
+# Na samej górze w importach w train.py dodajcie:
+from src.augmentation import MILD_AUGMENTATION # Możecie użyć STRONG_AUGMENTATION, ale MILD na początek jest bezpieczniejsze
 # hyperparameters
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 LEARNING_RATE_DISC = 1e-4
@@ -24,7 +25,7 @@ def main():
     generator = Generator(in_channels=3).to(DEVICE)
 
     # preparing data (dataset and dataloader)
-    dataset = MapDataset(root_dir="data/maps/train")
+    dataset = MapDataset(root_dir="data/maps/train", augmentations=MILD_AUGMENTATION)
     dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=2, pin_memory=True)
 
     print(f"Data prepared. There are {len(dataloader)} batches to work on")
@@ -61,8 +62,8 @@ def main():
             # STEP A: training discriminator - goal: teach discriminator to give 1 for originals and 0 for generated (false)
             # looking at real pair at first
             D_origin = discriminator(x, y)
-            loss_D_origin = bce_loss(D_origin, torch.ones_like(D_origin)) # we want to have result 1 (True) -> ones_like
-
+            # loss_D_origin = bce_loss(D_origin, torch.ones_like(D_origin)) # we want to have result 1 (True) -> ones_like
+            loss_D_origin = bce_loss(D_origin, torch.ones_like(D_origin) * 0.9)
             # looking at fake pair (sketch + generated image)
             D_generated = discriminator(x, y_fake.detach()) # using detach for training only discriminator
             loss_D_generated = bce_loss(D_generated, torch.zeros_like(D_generated)) # we want to have result 0 (False) -> zeros_like
