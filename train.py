@@ -15,7 +15,12 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 LEARNING_RATE_DISC = 1e-4
 LEARNING_RATE_GEN = 2e-4
 BATCH_SIZE = 16
-NUM_EPOCHS = 100
+NUM_EPOCHS = 200
+
+def lr_lambda(epoch):
+    # during first 100 epochs returns 1.0, after dropping linearly to 0.0
+
+    return 1.0 - max(0, epoch - 100) / float(100)
 
 def main():
     print(f"Starting on device: {DEVICE}")
@@ -45,6 +50,10 @@ def main():
     opt_discriminator = optim.Adam(discriminator.parameters(), lr=LEARNING_RATE_DISC, betas=(0.5, 0.999))
     opt_generator = optim.Adam(generator.parameters(), lr=LEARNING_RATE_GEN, betas=(0.5, 0.999))
     # parameter betas=(0.5, 0.999) makes chaotic training of GANs more stable
+
+    # Schedulers will take care of dropping lr
+    scheduler_discriminator = optim.lr_scheduler.LambdaLR(opt_discriminator, lr_lambda)
+    scheduler_generator = optim.lr_scheduler.LambdaLR(opt_generator, lr_lambda)
 
     # Training Loop
     for epoch in range(NUM_EPOCHS):
@@ -114,6 +123,13 @@ def main():
             folder="checkpoints",
             filename=f"discriminator_epoch_{epoch+1:03d}.pth.tar"
             )
+        
+        scheduler_discriminator.step()
+        scheduler_generator.step()
+
+        # showing the current learning rate
+        current_lr = opt_generator.param_groups[0]['lr']
+        print(f"-> Current learing rate fo generator: {current_lr:.6f}")
 
 # security check - allowing code to start only when calling the file
 if __name__ == "__main__":
