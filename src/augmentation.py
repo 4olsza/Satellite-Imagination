@@ -39,16 +39,10 @@ class Pix2PixAugmentation:
         # 1. Resize do większego rozmiaru (286x286)
         map_img, sat_img = self._resize(map_img, sat_img)
 
-        # 2. Losowa rotacja NA DUŻYM OBRAZIE (zanim wytniemy)
-        if random.random() < self.rotation_prob:
-            angle = random.uniform(-15, 15)
-            map_img = F.rotate(map_img, angle, fill=0)  # type: ignore
-            sat_img = F.rotate(sat_img, angle, fill=0)  # type: ignore
-
-        # 3. Dopiero teraz losowy crop do 256x256 (ten krok idealnie odetnie czarne rogi!)
+        # 2. Losowy crop do 256x256 (to daje przesunięcia i zmienność)
         map_img, sat_img = self._random_crop(map_img, sat_img)
 
-        # 4. Losowe odbicie w poziomie
+        # 3. Losowe odbicie w poziomie (Horizontal Flip)
         if random.random() < self.flip_prob:
             map_img = F.hflip(map_img)  # type: ignore
             sat_img = F.hflip(sat_img)  # type: ignore
