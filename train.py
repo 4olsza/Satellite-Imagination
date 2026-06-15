@@ -15,12 +15,13 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 LEARNING_RATE_DISC = 1e-4
 LEARNING_RATE_GEN = 2e-4
 BATCH_SIZE = 16
-NUM_EPOCHS = 200
+NUM_EPOCHS = 250
+DECAY_START = NUM_EPOCHS / 2
 
 def lr_lambda(epoch):
     # during first 100 epochs returns 1.0, after dropping linearly to 0.0
 
-    return 1.0 - max(0, epoch - 100) / float(100)
+    return 1.0 - max(0, epoch - DECAY_START) / float(NUM_EPOCHS - DECAY_START)
 
 def main():
     print(f"Starting on device: {DEVICE}")
