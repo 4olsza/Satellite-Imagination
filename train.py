@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm # for showing progress bar in terminal
+from metrics import ImageMetrics
 import os
 
 from src.data.dataset import MapDataset
@@ -10,7 +11,7 @@ from src.models.generator import Generator
 from src.models.discriminator import Discriminator
 from src.utils import save_checkpoint, save_some_examples
 # Na samej górze w importach w train.py dodajcie:
-from src.augmentation import MILD_AUGMENTATION # Możecie użyć STRONG_AUGMENTATION, ale MILD na początek jest bezpieczniejsze
+from src.augmentation import MILD_AUGMENTATION, NO_AUGMENTATION # Możecie użyć STRONG_AUGMENTATION, ale MILD na początek jest bezpieczniejsze
 # hyperparameters
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 LEARNING_RATE_DISC = 1e-4
@@ -36,6 +37,11 @@ def main():
     dataset = MapDataset(root_dir="data/maps/train", augmentations=MILD_AUGMENTATION)
     dataloader = DataLoader(dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=2, pin_memory=True)
 
+    # Przygotowanie danych walidacyjnych dla Early Stopping
+    
+    val_dataset = MapDataset(root_dir="data/maps/val", augmentations=NO_AUGMENTATION)
+    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=2, pin_memory=True)
+
     print(f"Data prepared. There are {len(dataloader)} batches to work on")
 
     # Loss Functions
@@ -57,6 +63,14 @@ def main():
     # Schedulers will take care of dropping lr
     scheduler_discriminator = optim.lr_scheduler.LambdaLR(opt_discriminator, lr_lambda)
     scheduler_generator = optim.lr_scheduler.LambdaLR(opt_generator, lr_lambda)
+
+    # Ustawienia Early Stopping
+    best_val_metric = float('inf')  # Chcemy zminimalizować błąd (np. MAE lub LPIPS)
+    patience = 15                   # Ile epok czekamy na poprawę zanim zabijemy trening
+    patience_counter = 0
+
+    # Ważne: Zaimportujcie sobie wasze metryki na górze pliku train.py!
+    # from metrics import ImageMetrics
 
     # Training Loop
     for epoch in range(NUM_EPOCHS):
@@ -142,6 +156,42 @@ def main():
         
         scheduler_discriminator.step()
         scheduler_generator.step()
+
+        # --- BLOK EARLY STOPPING (Na samym końcu pętli epoki) ---
+        generator.eval() # Przełączamy na tryb testowy
+        
+        with torch.no_grad():
+            # Zakładam, że macie val_loader. Bierzemy jedną paczkę:
+            val_map, val_sat = next(iter(val_loader))
+            val_map, val_sat = val_map.to(DEVICE), val_sat.to(DEVICE)
+            
+            # Generujemy obraz testowy
+            generated_val = generator(val_map)
+            
+            # Obliczamy obiektywną metrykę z waszego pliku metrics.py (np. MAE lub uproszczony LPIPS)
+            # MAE jest bardzo stabilne i szybkie do policzenia.
+            current_metric = ImageMetrics.mae(val_sat, generated_val)
+            
+            print(f"Epoch {epoch+1} | Val MAE Metric: {current_metric:.4f}")
+
+            # Sprawdzamy, czy pobiliśmy rekord
+            if current_metric < best_val_metric:
+                best_val_metric = current_metric
+                patience_counter = 0 # Resetujemy licznik cierpliwości
+                
+                # NADPISUJEMY "NAJLEPSZY" MODEL
+                torch.save(generator.state_dict(), "best_generator.pth")
+                print("🌟 Nowy najlepszy model zapisany!")
+            else:
+                patience_counter += 1
+                print(f"Brak poprawy od {patience_counter} epok.")
+
+            # ZABICIE TRENINGU (Wczesne zatrzymanie)
+            if patience_counter >= patience:
+                print(f"🛑 EARLY STOPPING: Model przestał się uczyć na walidacji od {patience} epok. Przerywam trening.")
+                break # Wychodzimy z pętli for
+                
+        generator.train() # Wracamy do trybu treningowego na kolejną epokę
 
         # showing the current learning rate
         current_lr = opt_generator.param_groups[0]['lr']
