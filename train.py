@@ -53,7 +53,7 @@ def main():
     l1_loss = nn.L1Loss()
 
     #L1 weight
-    L1_LAMBDA = 125
+    L1_LAMBDA = 50
 
     # Optimizers
     opt_discriminator = optim.Adam(discriminator.parameters(), lr=LEARNING_RATE_DISC, betas=(0.5, 0.999))
