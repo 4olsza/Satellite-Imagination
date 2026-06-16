@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm # for showing progress bar in terminal
+import os
 
 from src.data.dataset import MapDataset
 from src.models.generator import Generator
@@ -17,6 +18,7 @@ LEARNING_RATE_GEN = 2e-4
 BATCH_SIZE = 16
 NUM_EPOCHS = 250
 DECAY_START = NUM_EPOCHS / 2
+MAX_CHECKPOINTS = 5
 
 def lr_lambda(epoch):
     # during first 100 epochs returns 1.0, after dropping linearly to 0.0
@@ -124,6 +126,19 @@ def main():
             folder="checkpoints",
             filename=f"discriminator_epoch_{epoch+1:03d}.pth.tar"
             )
+        
+        # removing old checkpoints to clean the disc
+        if (epoch + 1) > MAX_CHECKPOINTS:
+            old_epoch = (epoch) + 1 - MAX_CHECKPOINTS
+
+            generator_path = os.path.join("checkpoints", f"generator_epoch_{old_epoch:03d}.pth.tar")
+            discriminator_path = os.path.join("checkpoints", f"discriminator_epoch_{old_epoch:03d}.pth.tar")
+
+            if os.path.exists(generator_path):
+                os.remove(generator_path)
+
+            if os.path.exists(discriminator_path):
+                os.remove(discriminator_path)
         
         scheduler_discriminator.step()
         scheduler_generator.step()
