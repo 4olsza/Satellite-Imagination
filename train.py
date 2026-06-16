@@ -3,10 +3,10 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
 from tqdm import tqdm # for showing progress bar in terminal
-from metrics import ImageMetrics
 import os
 
 from src.data.dataset import MapDataset
+from metrics import ImageMetrics
 from src.models.generator import Generator
 from src.models.discriminator import Discriminator
 from src.utils import save_checkpoint, save_some_examples
