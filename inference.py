@@ -139,13 +139,19 @@ Argumenty:
     def generate_comparison(self, image_path: str, output_path: str) -> None:
         """
         Tworzy obraz porównawczy: oryginalna mapa obok wygenerowanej satelity.
-Argumenty:
+        Argumenty:
             image_path: Ścieżka do mapy.
             output_path: Ścieżka zapisu pliku.
         """
         from PIL import ImageDraw
 
         map_img = Image.open(image_path).convert("RGB")
+        
+        # --- ZABEZPIECZENIE (To samo co w _preprocess) ---
+        width, height = map_img.size
+        if width > height:
+            map_img = map_img.crop((width // 2, 0, width, height))
+            
         map_img = map_img.resize((256, 256))
         sat_img = self.predict(image_path)
 
