@@ -172,7 +172,7 @@ def main():
             # MAE jest bardzo stabilne i szybkie do policzenia.
             current_metric = ImageMetrics.mae(val_sat, generated_val)
             
-            print(f"Epoch {epoch+1} | Val MAE Metric: {current_metric:.4f}")
+            print(f"=> Epoch {epoch+1} | Val MAE Metric: {current_metric:.4f}")
 
             # Sprawdzamy, czy pobiliśmy rekord
             if current_metric < best_val_metric:
@@ -184,12 +184,12 @@ def main():
                 print("🌟 Nowy najlepszy model zapisany!")
             else:
                 patience_counter += 1
-                print(f"Brak poprawy od {patience_counter} epok.")
+                print(f"=> No improvement since {patience_counter} epoch.")
 
             # ZABICIE TRENINGU (Wczesne zatrzymanie)
-            if patience_counter >= patience:
-                print(f"🛑 EARLY STOPPING: Model przestał się uczyć na walidacji od {patience} epok. Przerywam trening.")
-                break # Wychodzimy z pętli for
+            # if patience_counter >= patience:
+                # print(f"🛑 EARLY STOPPING: Model przestał się uczyć na walidacji od {patience} epok. Przerywam trening.")
+                # break # Wychodzimy z pętli for
                 
         generator.train() # Wracamy do trybu treningowego na kolejną epokę
 
