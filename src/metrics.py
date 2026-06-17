@@ -1,29 +1,32 @@
 """
-Metryki do ewaluacji generatora.
-Zawiera PSNR, SSIM, MAE, MSE oraz uproszczoną wersję LPIPS.
+Generator Evaluation Metrics.
+Includes PSNR, SSIM, MAE, MSE, and a simplified edge-based version of LPIPS.
 """
 
 import torch
 import torch.nn.functional as F
 import numpy as np
 import logging
+from typing import Dict, List
 
 logger = logging.getLogger(__name__)
 
 
 class ImageMetrics:
     """
-    Klasa z metrykami dla porównania obrazów.
+    A utility class containing metrics for image quality comparison.
     """
 
     @staticmethod
     def denormalize(tensor: torch.Tensor) -> torch.Tensor:
         """
-        Denormalizuje tensor z zakresu [-1, 1] do [0, 1].
-Argumenty:
-            tensor: Tensor obrazu.
-Zwraca:
-            Tensor w zakresie [0, 1].
+        Denormalizes an image tensor from the [-1, 1] range back to [0, 1].
+
+        Args:
+            tensor (torch.Tensor): The normalized image tensor.
+
+        Returns:
+            torch.Tensor: The denormalized tensor in the [0, 1] range.
         """
         return (tensor + 1) / 2
 
@@ -32,8 +35,8 @@ Zwraca:
         real: torch.Tensor, generated: torch.Tensor, max_val: float = 1.0
     ) -> float:
         """
-        Oblicza PSNR (Peak Signal-to-Noise Ratio).
-        Wyższa wartość oznacza lepszą jakość.
+        Calculates the Peak Signal-to-Noise Ratio (PSNR) between two images.
+        Higher values indicate better structural fidelity.
         """
         real = ImageMetrics.denormalize(real)
         generated = ImageMetrics.denormalize(generated)
@@ -50,8 +53,8 @@ Zwraca:
         real: torch.Tensor, generated: torch.Tensor, window_size: int = 11
     ) -> float:
         """
-        Oblicza SSIM (Structural Similarity Index).
-        Wartość w przybliżeniu 0-1, wyżej = lepsze podobieństwo.
+        Calculates the Structural Similarity Index (SSIM).
+        Returns a value approximately between 0 and 1, where higher means better similarity.
         """
         real = ImageMetrics.denormalize(real)
         generated = ImageMetrics.denormalize(generated)
@@ -81,8 +84,8 @@ Zwraca:
     @staticmethod
     def mae(real: torch.Tensor, generated: torch.Tensor) -> float:
         """
-        Oblicza MAE (Mean Absolute Error) między obrazami.
-        Niższa wartość jest lepsza.
+        Calculates the Mean Absolute Error (MAE / L1 Loss) between images.
+        Lower values indicate better pixel-level similarity.
         """
         real = ImageMetrics.denormalize(real)
         generated = ImageMetrics.denormalize(generated)
@@ -92,8 +95,8 @@ Zwraca:
     @staticmethod
     def mse(real: torch.Tensor, generated: torch.Tensor) -> float:
         """
-        Oblicza MSE (Mean Squared Error) między obrazami.
-        Niższa wartość jest lepsza.
+        Calculates the Mean Squared Error (MSE / L2 Loss) between images.
+        Lower values indicate better pixel-level similarity.
         """
         real = ImageMetrics.denormalize(real)
         generated = ImageMetrics.denormalize(generated)
@@ -103,8 +106,9 @@ Zwraca:
     @staticmethod
     def lpips(real: torch.Tensor, generated: torch.Tensor) -> float:
         """
-        Uproszczona wersja LPIPS (perceptual similarity).
-        Ta implementacja wykorzystuje porównanie krawędziowe.
+        A simplified approximation of LPIPS (Learned Perceptual Image Patch Similarity).
+        This implementation utilizes edge-detection filters to compare structural gradients 
+        instead of relying on a heavy pre-trained VGG network.
         """
         real = ImageMetrics.denormalize(real)
         generated = ImageMetrics.denormalize(generated)
@@ -113,14 +117,16 @@ Zwraca:
             torch.tensor([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=torch.float32)
             .unsqueeze(0)
             .unsqueeze(0)
+            .to(real.device)
         )
         kernel_y = (
             torch.tensor([[-1, -2, -1], [0, 0, 0], [1, 2, 1]], dtype=torch.float32)
             .unsqueeze(0)
             .unsqueeze(0)
+            .to(real.device)
         )
 
-        diff = 0
+        diff = 0.0
         for c in range(real.shape[1]):
             channel_real = real[:, c : c + 1, :, :]
             channel_gen = generated[:, c : c + 1, :, :]
@@ -133,76 +139,83 @@ Zwraca:
             diff += torch.mean(
                 torch.abs(edge_real_x - edge_gen_x)
                 + torch.abs(edge_real_y - edge_gen_y)
-            )
+            ).item()
 
-        return (diff / real.shape[1]).item()
+        return diff / real.shape[1]
 
     @staticmethod
-    def compute_all_metrics(real: torch.Tensor, generated: torch.Tensor) -> dict:
+    def compute_all_metrics(real: torch.Tensor, generated: torch.Tensor) -> Dict[str, float]:
         """
-        Oblicza zbiór wszystkich dostępnych metryk.
+        Computes a comprehensive dictionary of all available evaluation metrics.
         """
         return {
             "psnr": ImageMetrics.psnr(real, generated),
             "ssim": ImageMetrics.ssim(real, generated),
             "mae": ImageMetrics.mae(real, generated),
             "mse": ImageMetrics.mse(real, generated),
+            "lpips_approx": ImageMetrics.lpips(real, generated),
         }
 
 
 class MetricsTracker:
     """
-    Klasa do śledzenia historii metryk podczas ewaluacji.
+    A tracker class to accumulate metric histories during model evaluation loops.
     """
 
-    def __init__(self):
-        self.history = {
+    def __init__(self) -> None:
+        self.history: Dict[str, List[float]] = {
             "psnr": [],
             "ssim": [],
             "mae": [],
             "mse": [],
+            "lpips_approx": [],
         }
 
     def add(self, real: torch.Tensor, generated: torch.Tensor) -> None:
         """
-        Dodaje parę obrazów do ewaluacji.
+        Evaluates a pair of images and appends the results to the internal history.
         """
         metrics = ImageMetrics.compute_all_metrics(real, generated)
         for key, value in metrics.items():
             self.history[key].append(value)
 
-    def get_averages(self) -> dict:
+    def get_averages(self) -> Dict[str, float]:
         """
-        Zwraca średnie wartości metryk dla zebranej historii.
+        Calculates and returns the mean values of the accumulated metrics.
         """
         averages = {}
         for key, values in self.history.items():
-            averages[key] = np.mean(values) if values else 0.0
+            averages[key] = float(np.mean(values)) if values else 0.0
         return averages
 
     def print_summary(self) -> None:
-        """Wypisuje podsumowanie zebranych metryk."""
+        """
+        Outputs a formatted summary of the collected metric averages to the console.
+        """
         averages = self.get_averages()
 
         print("\n" + "=" * 50)
-        print("📊 METRYKI EWALUACJI")
-
+        print("📊 EVALUATION METRICS SUMMARY")
         print("=" * 50)
-        print(f"  PSNR (wyżej=lepiej):  {averages['psnr']:.4f}")
-        print(f"  SSIM (wyżej=lepiej):  {averages['ssim']:.4f}")
-        print(f"  MAE  (niżej=lepiej):  {averages['mae']:.4f}")
-        print(f"  MSE  (niżej=lepiej):  {averages['mse']:.4f}")
+        print(f"  PSNR         (higher=better): {averages.get('psnr', 0.0):.4f}")
+        print(f"  SSIM         (higher=better): {averages.get('ssim', 0.0):.4f}")
+        print(f"  MAE          (lower=better):  {averages.get('mae', 0.0):.4f}")
+        print(f"  MSE          (lower=better):  {averages.get('mse', 0.0):.4f}")
+        print(f"  Approx LPIPS (lower=better):  {averages.get('lpips_approx', 0.0):.4f}")
         print("=" * 50 + "\n")
 
 
 if __name__ == "__main__":
-    # Test metryk
-    print("Testing metrics...")
+    # Internal module tests
+    print("Executing internal metric tests...")
 
-    real = torch.randn((1, 3, 256, 256))
-    generated = torch.randn((1, 3, 256, 256))
+    # Generate dummy tensors representing a batch of 1 RGB image
+    dummy_real = torch.randn((1, 3, 256, 256))
+    dummy_generated = torch.randn((1, 3, 256, 256))
 
-    metrics = ImageMetrics.compute_all_metrics(real, generated)
-    print(f"Metrics: {metrics}")
+    test_metrics = ImageMetrics.compute_all_metrics(dummy_real, dummy_generated)
+    
+    for metric_name, metric_val in test_metrics.items():
+        print(f"  -> {metric_name.upper()}: {metric_val:.4f}")
 
-    print("✓ Metrics working!")
+    print("✓ Metrics pipeline verified and fully operational!")
