@@ -6,33 +6,36 @@ A implementation of a Conditional Generative Adversarial Network (cGAN) based on
 
 Model uczy się transformować mapy w obrazy satelitarne. Używamy warunkowego GAN-a (cGAN) z generatorem U-Net i dyskryminatorem. Generator generuje obrazy, a dyskryminator uczy się je oceniać.
 
-## Wymagania
+## Requirements
 
 - Python 3.8+
-- PyTorch z CUDA (lub CPU)
-- GPU (opcjonalnie, znacznie przyspiesza trening)
+- PyTorch with CUDA (or CPU)
+- GPU (optional, but it significantly speeds up training)
 
 ## Structure
 
 ```text
-├── checkpoints/          # [gitignore] Automatically managed model weights (keeps max 5 recent epochs)
-├── data/                 # [gitignore] Training dataset directory (downloaded separately)
+├── checkpoints/              # [gitignore] Automatically managed model weights (keeps max 5 recent epochs)
+├── data/                     # [gitignore] Training dataset directory (downloaded separately)
 │   └── maps/
 │       └── train/
 │       └── val/
-├── saved_images/         # [gitignore] Preview of generated image samples saved after every epoch
+├── saved_images/             # [gitignore] Preview of generated image samples saved after every epoch
 ├── src/
 │   ├── data/
-│   │   └── dataset.py    # Dataset class handling cropping and [-1, 1] normalization
+│   │   └── dataset.py        # Dataset class handling cropping and [-1, 1] normalization
 │   ├── models/
-│   │   ├── generator.py  # Generator architecture (U-Net with Bilinear modification)
-│   │   └── discriminator.py # Discriminator architecture (PatchGAN)
-│   ├── augmentation.py   # Safe, synchronized data augmentation class
-│   ├── metrics.py        # Evaluation math (PSNR, SSIM, MAE, MSE)
-│   └── utils.py          # Helper functions for saving weights and image samples
-├── loss_log.txt          # [gitignore] Lightweight text file logging the loss history
-├── requirements.txt      # Tailored environment dependencies
-└── train.py              # Main training loop script
+│   │   ├── generator.py      # Generator architecture (U-Net with Bilinear modification)
+│   │   └── discriminator.py  # Discriminator architecture (PatchGAN)
+│   ├── augmentation.py       # Safe, synchronized data augmentation class
+│   ├── metrics.py            # Evaluation math (PSNR, SSIM, MAE, MSE)
+│   └── utils.py              # Helper functions for saving weights and image samples
+├── tests/                    # Unit tests and debugging scripts
+│   └── test_dataset.py       # Script to verify data loading and saving correctness
+├── inference.py              # Script for running model inference on new sketches
+├── loss_log.txt              # [gitignore] Lightweight text file logging the loss history
+├── requirements.txt          # Tailored environment dependencies
+└── train.py                  # Main training loop script
 ```
 
 ## Instalacja
