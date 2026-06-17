@@ -42,9 +42,10 @@ Model uczy się transformować mapy w obrazy satelitarne. Używamy warunkowego G
 This project uses the official `maps` dataset from the original Pix2Pix paper (University of California, Berkeley). Due to its size, the dataset is not included in this repository.
 
 To prepare the data for training:
-1. Download the dataset from the official repository: [Pix2Pix Datasets](http://efrosgans.eecs.berkeley.edu/pix2pix/datasets/maps.tar.gz)
-2. Extract the downloaded archive.
-3. Place the extracted files into the `data/maps/` directory so that the structure matches the following:
+1. Go to the official Berkeley dataset repository: [Pix2Pix Datasets Index](http://efrosgans.eecs.berkeley.edu/pix2pix/datasets/)
+2. Find and click on **`maps.tar.gz`** (approx. 239 MB) to download the archive.
+3. Extract the downloaded archive.
+4. Place the extracted files into the `data/maps/` directory so that the structure matches the following:
 
 ```text
 data/
