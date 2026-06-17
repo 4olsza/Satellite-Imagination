@@ -37,6 +37,21 @@ Model uczy się transformować mapy w obrazy satelitarne. Używamy warunkowego G
 ├── requirements.txt          # Tailored environment dependencies
 └── train.py                  # Main training loop script
 ```
+## Dataset preparation
+
+This project uses the official `maps` dataset from the original Pix2Pix paper (University of California, Berkeley). Due to its size, the dataset is not included in this repository.
+
+To prepare the data for training:
+1. Download the dataset from the official repository: [Pix2Pix Datasets](http://efrosgans.eecs.berkeley.edu/pix2pix/datasets/maps.tar.gz)
+2. Extract the downloaded archive.
+3. Place the extracted files into the `data/maps/` directory so that the structure matches the following:
+
+```text
+data/
+└── maps/
+    ├── train/      # Used for training the model
+    └── val/        # Used for validation/testing
+```
 
 ## Instalacja
 
