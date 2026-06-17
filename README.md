@@ -18,11 +18,22 @@ This project features several advanced optimizations to ensure training stabilit
 * **Rolling Checkpoints (SSD Protection):** Implemented an automated disk cleanup routine that continuously stores only the 5 most recent training epochs, preventing the storage folder from consuming hundreds of gigabytes of disk space.
 * **Synchronized Augmentation (Mild Augmentation):** Isolated the augmentation pipeline to apply identical random crops and horizontal flips simultaneously to both the map sketch and the target satellite image, while excluding rotations to prevent black triangular margin artifacts.
 
-## Requirements
+## Requirements & Installation
 
+**Prerequisites:**
 * Python 3.8+
-* PyTorch with CUDA support (GPU is highly recommended for training speed) or CPU
-* All required Python packages are listed in the `requirements.txt` file.
+* PyTorch with CUDA support (GPU is highly recommended for training speed, though CPU works for inference)
+
+**Setup Instructions:**
+1. Clone the repository to your local machine:
+```bash
+git clone [https://github.com/4olsza/Satellite-Imagination.git](https://github.com/4olsza/Satellite-Imagination.git)
+cd Satellite-Imagination
+```
+2. Install the required dependecies. We recommend using a virtual environment:
+```bash
+pip install -r requirements.txt
+```
 
 ## Structure
 
@@ -66,7 +77,6 @@ data/
     └── val/        # Used for validation/testing
 ```
 
-## Installation
 
 ## Instalacja
 
