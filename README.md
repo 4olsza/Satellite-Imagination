@@ -60,9 +60,11 @@ pip install -r requirements.txt
 ├── requirements.txt          # Tailored environment dependencies
 └── train.py                  # Main training loop script
 ```
-## Dataset preparation
+## Dataset Preparation
 
 This project uses the official `maps` dataset from the original Pix2Pix paper (University of California, Berkeley). Due to its size, the dataset is not included in this repository.
+
+**Data Format Note:** The dataset consists of 512x256 paired images. The script expects the **left half (256x256)** to be the ground truth satellite image, and the **right half (256x256)** to be the map sketch.
 
 To prepare the data for training:
 1. Go to the official Berkeley dataset repository: [Pix2Pix Datasets Index](http://efrosgans.eecs.berkeley.edu/pix2pix/datasets/)
@@ -89,6 +91,11 @@ During training:
 * The model will automatically save intermediate generated images in the `saved_images/` directory after every epoch.
 * Loss values will be logged continuously into `loss_log.txt`.
 * The `checkpoints/` folder will automatically manage your disk space by keeping only the 5 most recent model weights.
+
+```markdown
+**Hardware Performance Reference:**
+Based on our benchmarks using an **NVIDIA GeForce RTX 5060 Ti (16GB VRAM)**, training with a batch size of 16 takes exactly **~16 seconds per epoch**. Training on CPU is possible but not recommended due to significantly increased training times.
+```
 
 ## Inference
 
@@ -123,99 +130,3 @@ python tests/test_dataset.py
 **Maciej** & **Krzysztof**,
 
 *students at AGH University of Kraków*
-
-## Instalacja
-
-```bash
-git clone https://github.com/4olsza/Satellite-Imagination.git
-cd Satellite-Imagination
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
-
-## Format danych
-
-Dane treningowe to obrazy ze złączonymi poziomo parami:
-- **Lewa połowa**: obraz satelitarny
-- **Prawa połowa**: mapa/sketch
-- **Rozmiar**: co najmniej 256 px wysokości, szerokość parzysta (będą przeskalowane do 256x256)
-- **Ścieżka**: `data/maps/train/`
-
-Przykład:
-```
-data/maps/train/
-├── mapa1.png    (512x256: satelita | mapa)
-├── mapa2.png    (512x256: satelita | mapa)
-└── ...
-```
-
-## Sposób działania
-
-1. **Trening**: Generator uczy się generować realizm poprzez dwie straty:
-   - Strata adversarialna (BCE): czy dyskryminator je rozróżni
-   - Strata L1: zgodność pixel-po-pixelu z obrazem rzeczywistym
-
-2. **Inferencja**: Wytrenowany generator transformuje mapę w obraz satelitarny
-
-3. **Architektura**:
-   - Generator: U-Net z skip connections (encoder-decoder)
-   - Dyskryminator: PatchGAN (ocenia fragmenty obrazu)
-
-## Uruchomienie
-
-### Trening
-
-```bash
-python train.py
-```
-
-Parametry (w `train.py`):
-- Learning rate: 2e-4
-- Batch size: 16
-- Epoki: 100
-- L1 loss weight: 150
-
-Zapisuje:
-- Checkpointy: `checkpoints/generator_epoch_*.pth.tar`
-- Przykładowe wygenerowane obrazy: `saved_images/`
-
-### Inferencja
-
-```bash
-python inference.py --checkpoint checkpoints/generator_epoch_050.pth.tar --input map.png --output results/
-```
-
-Generuje obrazy satelitarne z map (pojedyncze zdjęcie lub folder).
-
-### Testy
-
-```bash
-python test.py
-```
-
-Sprawdza poprawność wczytywania danych i modelu.
-
-## Możliwości
-
-- Generowanie realistycznych obrazów satelitarnych z map
-- Ewaluacja metrykami: PSNR, SSIM, MAE, MSE (w `metrics.py`)
-- Augmentacja danych (rotacje, flip, color jitter)
-- Wizualizacja par obraz-mapa (skrypt `visualize.py`)
-- Training z checkpointami co epokę
-
-## Performance
-
-- GPU (RTX 3070): ~15-20 min/epokę
-- Pamięć: ~8GB VRAM
-- CPU: znacznie wolniej (nie rekomendujemy)
-
-## Uwagi
-
-- Model zaktualizowany: dekoder bez artefaktów dzięki Upsample+Conv2d zamiast ConvTranspose2d
-- Wymaga dużego, różnorodnego zbioru treningowego (mode collapse ze małymi zbiorami)
-- Learning rate wrażliwy - domyślny 2e-4 jest wytunowany empirycznie
-
-## Autorzy
-
-Maciej, Krzysztof
