@@ -44,7 +44,7 @@ pip install -r requirements.txt
 │       └── train/
 │       └── val/
 ├── saved_images/             # [gitignore] Preview of generated image samples saved after every epoch
-├── app/                      # folder for presentation files
+├── presentation/                      # folder for presentation files
 │   └── app.py                # app file
 ├── src/
 │   ├── data/
