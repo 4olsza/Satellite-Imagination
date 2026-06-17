@@ -1,5 +1,6 @@
 # Satellite Imagination
-# Pix2Pix: Image-to-Image translation (map sketch -> satellite image)
+
+A implementation of a Conditional Generative Adversarial Network (cGAN) based on the Pix2Pix architecture, trained to generate realistic satellite imagery from simplified map sketches.
 
 ## Opis
 
@@ -10,6 +11,29 @@ Model uczy się transformować mapy w obrazy satelitarne. Używamy warunkowego G
 - Python 3.8+
 - PyTorch z CUDA (lub CPU)
 - GPU (opcjonalnie, znacznie przyspiesza trening)
+
+## Structure
+
+```text
+├── checkpoints/          # [gitignore] Automatically managed model weights (keeps max 5 recent epochs)
+├── data/                 # [gitignore] Training dataset directory (downloaded separately)
+│   └── maps/
+│       └── train/
+│       └── val/
+├── saved_images/         # [gitignore] Preview of generated image samples saved after every epoch
+├── src/
+│   ├── data/
+│   │   └── dataset.py    # Dataset class handling cropping and [-1, 1] normalization
+│   ├── models/
+│   │   ├── generator.py  # Generator architecture (U-Net with Bilinear modification)
+│   │   └── discriminator.py # Discriminator architecture (PatchGAN)
+│   ├── augmentation.py   # Safe, synchronized data augmentation class
+│   ├── metrics.py        # Evaluation math (PSNR, SSIM, MAE, MSE)
+│   └── utils.py          # Helper functions for saving weights and image samples
+├── loss_log.txt          # [gitignore] Lightweight text file logging the loss history
+├── requirements.txt      # Tailored environment dependencies
+└── train.py              # Main training loop script
+```
 
 ## Instalacja
 
@@ -90,22 +114,6 @@ Sprawdza poprawność wczytywania danych i modelu.
 - Augmentacja danych (rotacje, flip, color jitter)
 - Wizualizacja par obraz-mapa (skrypt `visualize.py`)
 - Training z checkpointami co epokę
-
-## Struktura
-
-```
-├── train.py              # Trening modelu
-├── inference.py          # Generowanie obrazów
-├── test.py               # Testy
-├── metrics.py            # PSNR, SSIM, MAE, MSE
-├── augmentation.py       # Augmentacja danych
-├── src/
-│   ├── models/           # Generator i Dyskryminator
-│   ├── data/dataset.py   # Loader danych
-│   ├── utils.py          # Helpery (save, examples)
-│   └── visualize.py      # Podgląd danych
-└── data/maps/train/      # Dane treningowe
-```
 
 ## Performance
 
