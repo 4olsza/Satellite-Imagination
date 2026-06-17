@@ -6,7 +6,7 @@ from tqdm import tqdm # for showing progress bar in terminal
 import os
 
 from src.data.dataset import MapDataset
-from metrics import ImageMetrics
+from src.metrics import ImageMetrics
 from src.models.generator import Generator
 from src.models.discriminator import Discriminator
 from src.utils import save_checkpoint, save_some_examples
