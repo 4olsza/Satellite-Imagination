@@ -2,7 +2,7 @@
 
 *An implementation of a Conditional Generative Adversarial Network (cGAN) based on the Pix2Pix architecture, trained to generate realistic satellite imagery from simplified map sketches.*
 
-## 📖 Project Overview
+## Project Overview
 
 This model learns to translate abstract map layouts into photorealistic satellite images. It utilizes a Conditional GAN (cGAN) framework consisting of two competing neural networks:
 * **The Generator (U-Net):** Learns to synthesize satellite images from map sketches. It uses skip connections to preserve essential spatial details and prevent the loss of low-level information.
@@ -10,7 +10,7 @@ This model learns to translate abstract map layouts into photorealistic satellit
 
 Through adversarial training, the Generator continuously improves its ability to "fool" the Discriminator, resulting in highly accurate and realistic terrain generation.
 
-## ⚙️ Requirements
+## Requirements
 
 * Python 3.8+
 * PyTorch with CUDA support (GPU is highly recommended for training speed) or CPU
