@@ -125,7 +125,8 @@ class Pix2PixInference:
             input_tensor = self._preprocess(image_path)
             output_tensor = self.generator(input_tensor)
             output_image = self._postprocess(output_tensor)
-
+        
+        output_image = output_image.resize((512, 512), Image.Resampling.LANCZOS)
         return output_image
 
     def predict_batch(self, image_paths: List[str], output_dir: str) -> None:
