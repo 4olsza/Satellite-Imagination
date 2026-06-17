@@ -1,6 +1,5 @@
-# Satellite-Imagination
-
-Projekt Pix2Pix do generowania obrazów satelitarnych z map przy pomocy sieci neuronowych (GAN).
+# Satellite Imagination
+# Pix2Pix: Image-to-Image translation (map sketch -> satellite image)
 
 ## Opis
 
