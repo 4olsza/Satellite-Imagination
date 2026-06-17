@@ -11,6 +11,7 @@ env/
 
 # Generated text files and preview
 saved_images/
+testy/
 checkpoints/
 test_result.png
 loss_log.txt
