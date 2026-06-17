@@ -92,10 +92,8 @@ During training:
 * Loss values will be logged continuously into `loss_log.txt`.
 * The `checkpoints/` folder will automatically manage your disk space by keeping only the 5 most recent model weights.
 
-```markdown
 **Hardware Performance Reference:**
 Based on our benchmarks using an **NVIDIA GeForce RTX 5060 Ti (16GB VRAM)**, training with a batch size of 16 takes exactly **~16 seconds per epoch**. Training on CPU is possible but not recommended due to significantly increased training times.
-```
 
 ## Inference
 
