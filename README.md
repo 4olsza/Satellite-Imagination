@@ -27,7 +27,7 @@ This project features several advanced optimizations to ensure training stabilit
 **Setup Instructions:**
 1. Clone the repository to your local machine:
 ```bash
-git clone [https://github.com/4olsza/Satellite-Imagination.git](https://github.com/4olsza/Satellite-Imagination.git)
+git clone https://github.com/4olsza/Satellite-Imagination.git
 cd Satellite-Imagination
 ```
 2. Install the required dependecies. We recommend using a virtual environment:
@@ -77,6 +77,37 @@ data/
     └── val/        # Used for validation/testing
 ```
 
+## Training the Model
+
+To start training the cGAN from scratch, run the main training script. The script is configured with optimal hyperparameters (e.g., 500 epochs with linear decay starting at epoch 250).
+
+```bash
+python train.py
+```
+
+During training:
+* The model will automatically save intermediate generated images in the `saved_images/` directory after every epoch.
+* Loss values will be logged continuously into `loss_log.txt`.
+* The `checkpoints/` folder will automatically manage your disk space by keeping only the 5 most recent model weights.
+
+## Inference
+
+Once the model is trained, you can use it to translate new map sketches into satellite images. Ensure you have the trained weights in your `checkpoints/` folder. The script supports both single-image translation and batch processing via command-line arguments.
+
+**For a single image:**
+```bash
+python inference.py --checkpoint checkpoints/generator_latest.pth --input data/maps/val/1.jpg --output ./output
+```
+**For a batch of images (processing an entire directory):**
+```bash
+python inference.py --checkpoint checkpoints/generator_latest.pth --input data/maps/val/ --output ./output
+```
+
+Available arguments:
+* `--checkpoint` (required): Path to the trained model weights.
+* `--input` (required): Path to a single map image or a directory of images.
+* `--output` (optional): Directory where generated satellites will be saved (default: ./output).
+* `--device` (optional): Set to cuda or cpu (default: cuda).
 
 ## Instalacja
 
