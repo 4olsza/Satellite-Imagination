@@ -10,6 +10,14 @@ This model learns to translate abstract map layouts into photorealistic satellit
 
 Through adversarial training, the Generator continuously improves its ability to "fool" the Discriminator, resulting in highly accurate and realistic terrain generation.
 
+## Key Features & Engineering Optimizations
+
+This project features several advanced optimizations to ensure training stability, high-quality image synthesis, and hardware efficiency:
+* **Bilinear Upsampling + Conv2D:** Replaced the standard transposed convolutions (`ConvTranspose2d`) with a combination of bilinear upsampling and 3x3 convolutions. This completely eliminated checkerboard artifacts, producing smooth color transitions.
+* **Learning Rate Decay:** Integrated a linear learning rate scheduler (`LambdaLR`) that smoothly decays the learning rate to zero during the second half of the training process, allowing the model to finely chisel high-frequency terrain details.
+* **Rolling Checkpoints (SSD Protection):** Implemented an automated disk cleanup routine that continuously stores only the 5 most recent training epochs, preventing the storage folder from consuming hundreds of gigabytes of disk space.
+* **Synchronized Augmentation (Mild Augmentation):** Isolated the augmentation pipeline to apply identical random crops and horizontal flips simultaneously to both the map sketch and the target satellite image, while excluding rotations to prevent black triangular margin artifacts.
+
 ## Requirements
 
 * Python 3.8+
@@ -57,6 +65,8 @@ data/
     ├── train/      # Used for training the model
     └── val/        # Used for validation/testing
 ```
+
+## Installation
 
 ## Instalacja
 
