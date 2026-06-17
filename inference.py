@@ -50,8 +50,8 @@ class Pix2PixInference:
 
         # Load model weights safely, handling both standalone state dicts and training checkpoints
         checkpoint = torch.load(checkpoint_path, map_location=self.device)
-        if isinstance(checkpoint, dict) and "generator_state_dict" in checkpoint:
-            self.generator.load_state_dict(checkpoint["generator_state_dict"])
+        if isinstance(checkpoint, dict) and "state_dict" in checkpoint:
+            self.generator.load_state_dict(checkpoint["state_dict"])
         else:
             self.generator.load_state_dict(checkpoint)
 
