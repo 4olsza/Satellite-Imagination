@@ -109,6 +109,20 @@ Available arguments:
 * `--output` (optional): Directory where generated satellites will be saved (default: ./output).
 * `--device` (optional): Set to cuda or cpu (default: cuda).
 
+## Evaluation & Tests
+
+The project includes a robust metrics suite (PSNR, SSIM, MAE, MSE, and an edge-based LPIPS approximation) located in `src/metrics.py`. These mathematical utilities are designed to be imported and integrated directly into custom evaluation loops.
+
+To ensure the integrity of the data pipeline and dataset class before a long training session, run the unit tests:
+```bash
+python tests/test_dataset.py
+```
+
+## Authors
+
+* **Maciej** & **Krzysztof**,
+* *students at AGH University of Kraków*
+
 ## Instalacja
 
 ```bash
