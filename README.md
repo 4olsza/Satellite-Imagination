@@ -120,8 +120,8 @@ python tests/test_dataset.py
 
 ## Authors
 
-* **Maciej** & **Krzysztof**,
-* *students at AGH University of Kraków*
+**Maciej** & **Krzysztof**,
+ *students at AGH University of Kraków*
 
 ## Instalacja
 
