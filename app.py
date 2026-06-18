@@ -18,7 +18,7 @@ device = "mps" if torch.backends.mps.is_available() else "cpu"
 print(f"🚀 Initializing inference engine on: {device.upper()}")
 
 # Path to the pre-trained model weights
-CHECKPOINT_PATH = "generator_epoch_208.pth.tar" 
+CHECKPOINT_PATH = "generator_epoch_350.pth.tar" 
 
 print("Loading neural network weights...")
 inference_model = Pix2PixInference(checkpoint_path=CHECKPOINT_PATH, device=device)
